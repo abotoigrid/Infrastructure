@@ -139,15 +139,14 @@ jobs:
           python-version: '3.11'
       - name: Install Ansible
         run: pip install ansible
-      - name: Create Ansible Inventory
-        run: |
-          echo "[servers]" > Ansible/inventory.ini
-          echo "app_server ansible_host=${{ needs.apply.outputs.vm_public_ip }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> Ansible/inventory.ini
       - name: Run Ansible playbook
         run: |
           cd Ansible
-          ansible-playbook main.yaml -i inventory.ini
-          
+          ansible-playbook main.yaml -i inventory.ini -e "ansible_ssh_private_key_file=${{secrets.SSH_PRIVATE_KEY_NAME}}.pem"
+        env:
+          ANSIBLE_HOSTS: |
+            [servers]
+            app_server ansible_host=${{ needs.apply.outputs.vm_public_ip }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/${{secrets.SSH_PRIVATE_KEY_NAME}}.pem
   destroy:
     name: Terraform Destroy
     needs: apply
