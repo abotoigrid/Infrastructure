@@ -1,5 +1,5 @@
 aws_region        = "eu-central-1"
-instance_key_name = "ec2_capstone_project_md"
+ec2_key_name = "ec2_capstone_project_md"
 tags = {
   Name    = "Capstone Project Bucket"
   Owner   = "abotoi"

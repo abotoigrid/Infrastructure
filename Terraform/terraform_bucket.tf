@@ -9,4 +9,7 @@ resource "aws_s3_bucket" "s3_bucket" {
     Owner   = "abotoi"
     Project = "2024_internship_moldova"
   }
+  lifecycle {
+    prevent_destroy = true
+  }
 }

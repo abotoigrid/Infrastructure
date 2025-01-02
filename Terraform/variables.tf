@@ -53,7 +53,7 @@ variable "db_password" {
   default     = "password123" 
 }
 
-variable "instance_key_name" {
+variable "ec2_key_name" {
   type        = string
   description = "Name of the key pair to associate with the EC2 Instance"
 }

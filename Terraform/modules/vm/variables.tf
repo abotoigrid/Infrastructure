@@ -18,7 +18,7 @@ variable "security_group_id" {
   description = "Security Group ID"
 }
 
-variable "instance_key_name" {
+variable "ec2_key_name" {
   type        = string
   description = "Key name to use for the instance"
 }

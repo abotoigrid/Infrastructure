@@ -74,7 +74,7 @@ jobs:
         run: terraform init
       - name: Terraform Plan
         id: plan
-        run: terraform plan -out=tfplan -var="instance_key_name=${{ vars.INSTANCE_KEY_NAME }}"
+        run: terraform plan -out=tfplan -var="ec2_key_name=${{ secrets.INSTANCE_KEY_NAME }}"
       - name: Upload Plan
         uses: actions/upload-artifact@v3
         with:
@@ -85,7 +85,6 @@ jobs:
     name: Terraform Apply
     needs: plan
     runs-on: ubuntu-latest
-    environment: prod
     defaults:
       run:
         working-directory: Terraform
@@ -110,13 +109,27 @@ jobs:
         run: terraform init
       - name: Terraform Apply
         run: terraform apply tfplan
+        env:
+          TF_VAR_ec2_key_name: ${{ secrets.INSTANCE_KEY_NAME }}
       - name: Get outputs
         id: get-outputs
         run: |
-          VM_PUBLIC_IP=$(terraform output -raw vm_public_ip | sed -n '1p')
-          DB_ENDPOINT=$(terraform output -raw db_endpoint | sed -n '1p')
-          echo "vm_public_ip=$VM_PUBLIC_IP" >> "$GITHUB_OUTPUT"
-          echo "db_endpoint=$DB_ENDPOINT" >> "$GITHUB_OUTPUT"
+          echo "Running Get outputs step"
+          VM_PUBLIC_IP_RAW=$(terraform output -raw vm_public_ip)
+          echo "VM_PUBLIC_IP_RAW: $VM_PUBLIC_IP_RAW"
+          DB_ENDPOINT_RAW=$(terraform output -raw db_endpoint)
+          echo "DB_ENDPOINT_RAW: $DB_ENDPOINT_RAW"
+
+          VM_PUBLIC_IP=$(echo "$VM_PUBLIC_IP_RAW" | sed 's/.*\[command\].*terraform-bin output -raw vm_public_ip//' | sed 's/::debug::Terraform exited with code 0.//' | awk '{print $1}' | tr -d '\n' | sed 's/::debug::stdout:::debug::stderr:::debug::exitcode:$//')
+          DB_ENDPOINT=$(echo "$DB_ENDPOINT_RAW" | sed 's/.*\[command\].*terraform-bin output -raw db_endpoint//' | sed 's/::debug::Terraform exited with code 0.//' | awk '{print $1}' | tr -d '\n' | sed 's/::debug::stdout:::debug::stderr:::debug::exitcode:$//')
+
+          echo "VM_PUBLIC_IP: $VM_PUBLIC_IP"
+          echo "DB_ENDPOINT: $DB_ENDPOINT"
+
+          printf "vm_public_ip=%s\n" "$VM_PUBLIC_IP" >> "$GITHUB_OUTPUT"
+          printf "db_endpoint=%s\n" "$DB_ENDPOINT" >> "$GITHUB_OUTPUT"
+          echo "Finished Get outputs step"
+
     
     outputs:
       vm_public_ip: ${{ steps.get-outputs.outputs.vm_public_ip }}
@@ -129,54 +142,35 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+
       - name: Install Ansible
         run: pip install ansible
-      - name: Download Terraform Plan
-        uses: actions/download-artifact@v3
-        with:
-          name: tfplan
-          path: Terraform/
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_REGION }}
-      - name: Terraform Init
-        run: terraform init
-        working-directory: Terraform
-      - name: Get terraform output
-        id: get-outputs
+
+      - name: Create SSH Key
         run: |
-          VM_PUBLIC_IP=$(terraform output -raw vm_public_ip | sed -n '1p')
-          INVENTORY_CONTENT=$(cat <<EOF
-          [servers]
-          app_server ansible_host=$VM_PUBLIC_IP ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/${{secrets.SSH_PRIVATE_KEY_NAME}}.pem
-          EOF
-          )
-          echo "inventory<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$INVENTORY_CONTENT" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
-        working-directory: Terraform
-      - name: Create inventory file
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/${{secrets.SSH_PRIVATE_KEY_NAME}}.pem
+          chmod 600 ~/.ssh/${{secrets.SSH_PRIVATE_KEY_NAME}}.pem
+      - name: Configure Ansible Inventory
         run: |
-          echo "${{ steps.get-outputs.outputs.inventory }}" > /tmp/ansible_inventory
-      - name: Run Ansible playbook
+          echo "[servers]" > inventory
+          echo "app_server ansible_host=${{ needs.apply.outputs.vm_public_ip }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/${{secrets.SSH_PRIVATE_KEY_NAME}}.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> inventory
+      - name: Run Ansible Playbook
         run: |
-          cd Ansible
-          ansible-playbook main.yaml -i /tmp/ansible_inventory -e "ansible_ssh_private_key_file=${{secrets.SSH_PRIVATE_KEY}}"
+          ansible-playbook -i inventory Ansible/main.yaml
+        env:
+          ANSIBLE_PRIVATE_KEY_FILE: ${{secrets.SSH_PRIVATE_KEY}}
+
 
   destroy:
     name: Terraform Destroy
     needs: apply
     runs-on: ubuntu-latest
-    environment: prod
     if: github.event_name == 'workflow_dispatch'
     defaults:
       run:

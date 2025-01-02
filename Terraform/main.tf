@@ -12,7 +12,7 @@ module "vm" {
   instance_type     = var.instance_type
   subnet_id         = module.network.subnet_id_a
   security_group_id = module.network.security_group_id
-  instance_key_name = var.instance_key_name
+  ec2_key_name = var.ec2_key_name
   tags              = var.tags
 }
 
