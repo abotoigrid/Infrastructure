@@ -1,0 +1,7 @@
+# hosts-dev
+
+[webserver]
+app1 ansible_host=3.92.47.66
+
+[local]
+control ansible_connection=local
