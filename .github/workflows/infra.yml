@@ -141,18 +141,26 @@ jobs:
         run: pip install ansible
       - name: Verify VM Public IP Output
         run: echo "VM Public IP from apply job is ${{ needs.apply.outputs.vm_public_ip }}"
-
       - name: Print Ansible Hosts Variable
-        run: echo "ANSIBLE_HOSTS value is: $ANSIBLE_HOSTS"
-      
+        run: |
+          echo "ANSIBLE_HOSTS value is: $ANSIBLE_HOSTS"
       - name: Run Ansible playbook
         run: |
           cd Ansible
-          ansible-playbook main.yaml -i inventory.ini -e "ansible_ssh_private_key_file=${{secrets.SSH_PRIVATE_KEY_NAME}}.pem"
+          ansible-playbook main.yaml -i inventory.ini -vvv
         env:
           ANSIBLE_HOSTS: |
             [servers]
-            app_server ansible_host=${{ needs.apply.outputs.vm_public_ip }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/${{secrets.SSH_PRIVATE_KEY_NAME}}.pem
+            app_server ansible_host=${{ needs.apply.outputs.vm_public_ip }} ansible_user=ubuntu
+      
+      # - name: Run Ansible playbook
+      #   run: |
+      #     cd Ansible
+      #     ansible-playbook main.yaml -i inventory.ini -e "ansible_ssh_private_key_file=${{secrets.SSH_PRIVATE_KEY_NAME}}.pem"
+      #   env:
+      #     ANSIBLE_HOSTS: |
+      #       [servers]
+      #       app_server ansible_host=${{ needs.apply.outputs.vm_public_ip }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/${{secrets.SSH_PRIVATE_KEY_NAME}}.pem
   destroy:
     name: Terraform Destroy
     needs: apply
