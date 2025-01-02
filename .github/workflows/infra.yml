@@ -164,7 +164,7 @@ jobs:
       - name: Run Ansible playbook
         run: |
           cd Ansible
-          ansible-playbook playbooks/main.yaml -i /tmp/ansible_inventory -e "ansible_ssh_private_key_file=${{secrets.SSH_PRIVATE_KEY}}"
+          ansible-playbook main.yaml -i /tmp/ansible_inventory -e "ansible_ssh_private_key_file=${{secrets.SSH_PRIVATE_KEY}}"
 
   destroy:
     name: Terraform Destroy
