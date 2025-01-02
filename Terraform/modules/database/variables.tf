@@ -1,6 +1,10 @@
-variable "subnet_id" {
+variable "subnet_id_a" {
   type        = string
-  description = "Subnet ID"
+  description = "Subnet ID A"
+}
+variable "subnet_id_b" {
+  type        = string
+  description = "Subnet ID B"
 }
 
 variable "db_name" {
@@ -24,3 +28,7 @@ variable "tags" {
   type        = map(string)
 }
 
+variable "vpc_id" {
+  type        = string
+  description = "VPC ID"
+}

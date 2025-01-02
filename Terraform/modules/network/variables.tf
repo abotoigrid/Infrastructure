@@ -3,9 +3,13 @@ variable "vpc_cidr_block" {
   description = "CIDR block for VPC"
 }
 
-variable "subnet_cidr_block" {
+variable "subnet_cidr_block_a" {
   type        = string
-  description = "CIDR block for Subnet"
+  description = "CIDR block for Subnet A"
+}
+variable "subnet_cidr_block_b" {
+  type        = string
+  description = "CIDR block for Subnet B"
 }
 
 variable "tags" {

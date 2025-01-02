@@ -3,10 +3,17 @@ resource "aws_vpc" "main" {
   tags       = var.tags
 }
 
-resource "aws_subnet" "main" {
+resource "aws_subnet" "main_a" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = var.subnet_cidr_block
+  cidr_block        = var.subnet_cidr_block_a
   availability_zone = "eu-central-1a"
+  tags              = var.tags
+}
+
+resource "aws_subnet" "main_b" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = var.subnet_cidr_block_b
+  availability_zone = "eu-central-1b"
   tags              = var.tags
 }
 
@@ -28,8 +35,13 @@ resource "aws_route" "internet_access" {
 
 }
 
-resource "aws_route_table_association" "main" {
-  subnet_id      = aws_subnet.main.id
+resource "aws_route_table_association" "main_a" {
+  subnet_id      = aws_subnet.main_a.id
+  route_table_id = aws_route_table.main.id
+}
+
+resource "aws_route_table_association" "main_b" {
+  subnet_id      = aws_subnet.main_b.id
   route_table_id = aws_route_table.main.id
 }
 

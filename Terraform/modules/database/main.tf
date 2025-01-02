@@ -1,12 +1,12 @@
 resource "aws_db_subnet_group" "main" {
   name       = "db-subnet-group"
-  subnet_ids = [var.subnet_id]
+  subnet_ids = [var.subnet_id_a, var.subnet_id_b]
   tags       = var.tags
 }
 
 resource "aws_security_group" "database" {
   name   = "allow_mysql"
-  vpc_id = data.aws_subnet.selected.vpc_id
+  vpc_id = var.vpc_id
 
   ingress {
     from_port   = 3306
@@ -38,8 +38,8 @@ resource "aws_db_instance" "main" {
   tags                   = var.tags
 }
 
-data "aws_subnet" "selected" {
-  id = var.subnet_id
-}
+# data "aws_subnet" "selected" {
+#   id = var.subnet_id
+# }
 
 

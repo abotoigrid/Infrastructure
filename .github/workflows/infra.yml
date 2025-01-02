@@ -120,4 +120,28 @@ jobs:
       vm_public_ip: ${{ steps.get-outputs.outputs.vm_public_ip }}
       db_endpoint: ${{ steps.get-outputs.outputs.db_endpoint }}
       
+  destroy:
+    name: Terraform Destroy
+    needs: apply
+    runs-on: ubuntu-latest
+    environment: prod
+    if: github.event_name == 'workflow_dispatch'
+    defaults:
+      run:
+        working-directory: Terraform
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
  
