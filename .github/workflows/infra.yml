@@ -129,28 +129,41 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
       - name: Install Ansible
         run: pip install ansible
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.5.3
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v3
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          name: tfplan
+          path: Terraform/
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Terraform Init
+        run: terraform init
+        working-directory: Terraform
+      - name: Get terraform output
+        id: get-outputs
+        run: |
+          echo "vm_public_ip=$(terraform output -raw vm_public_ip)" >> "$GITHUB_OUTPUT"
+        working-directory: Terraform
       - name: Create inventory file
         run: |
           echo "[servers]" > /tmp/ansible_inventory
-          echo "app_server ansible_host=${{ needs.apply.outputs.vm_public_ip }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/${{secrets.SSH_PRIVATE_KEY_NAME}}.pem" >> /tmp/ansible_inventory
+          echo "app_server ansible_host=${{ steps.get-outputs.outputs.vm_public_ip }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/${{secrets.SSH_PRIVATE_KEY_NAME}}.pem" >> /tmp/ansible_inventory
       - name: Run Ansible playbook
         run: |
           cd Ansible
-          ansible-playbook main.yaml -i /tmp/ansible_inventory -e "ansible_ssh_private_key_file=${{secrets.SSH_PRIVATE_KEY}}"
+          ansible-playbook playbooks/main.yml -i /tmp/ansible_inventory -e "ansible_ssh_private_key_file=${{secrets.SSH_PRIVATE_KEY}}"
 
   destroy:
     name: Terraform Destroy
