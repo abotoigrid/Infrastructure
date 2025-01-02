@@ -139,6 +139,12 @@ jobs:
           python-version: '3.11'
       - name: Install Ansible
         run: pip install ansible
+      - name: Verify VM Public IP Output
+        run: echo "VM Public IP from apply job is ${{ needs.apply.outputs.vm_public_ip }}"
+
+      - name: Print Ansible Hosts Variable
+        run: echo "ANSIBLE_HOSTS value is: $ANSIBLE_HOSTS"
+      
       - name: Run Ansible playbook
         run: |
           cd Ansible
