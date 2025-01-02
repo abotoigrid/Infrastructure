@@ -155,12 +155,18 @@ jobs:
         id: get-outputs
         run: |
           VM_PUBLIC_IP=$(terraform output -raw vm_public_ip | sed -n '1p')
-          echo "vm_public_ip=$VM_PUBLIC_IP" >> "$GITHUB_OUTPUT"
+          INVENTORY_CONTENT=$(cat <<EOF
+          [servers]
+          app_server ansible_host=$VM_PUBLIC_IP ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/${{secrets.SSH_PRIVATE_KEY_NAME}}.pem
+          EOF
+          )
+          echo "inventory<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$INVENTORY_CONTENT" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
         working-directory: Terraform
       - name: Create inventory file
         run: |
-          echo "[servers]" > /tmp/ansible_inventory
-          echo "app_server ansible_host=${{ steps.get-outputs.outputs.vm_public_ip }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/${{secrets.SSH_PRIVATE_KEY_NAME}}.pem" >> /tmp/ansible_inventory
+          echo "${{ steps.get-outputs.outputs.inventory }}" > /tmp/ansible_inventory
       - name: Run Ansible playbook
         run: |
           cd Ansible
