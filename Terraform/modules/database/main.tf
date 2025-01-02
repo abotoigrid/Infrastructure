@@ -24,7 +24,7 @@ resource "aws_security_group" "database" {
 }
 
 resource "aws_db_instance" "main" {
-  allocated_storage      = 2
+  allocated_storage      = 20
   engine                 = "mysql"
   engine_version         = "8.0.33"
   instance_class         = "db.t3.micro"
