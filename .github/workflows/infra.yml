@@ -1,0 +1,118 @@
+name: Infrastructure Automation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  fmt:
+    name: Terraform Format
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Infrastructure/Terraform
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+      - name: Check if formatting is needed
+        if: steps.fmt.outcome != 'success'
+        run: |
+          echo "Formatting is required"
+          exit 1
+
+  validate:
+    name: Terraform Validate
+    needs: fmt
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Infrastructure/Terraform
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Validate
+        run: terraform validate
+
+  plan:
+    name: Terraform Plan
+    needs: validate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Infrastructure/Terraform
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -out=tfplan
+      - name: Upload Plan
+        uses: actions/upload-artifact@v3
+        with:
+          name: tfplan
+          path: Infrastructure/Terraform/tfplan
+    
+  apply:
+    name: Terraform Apply
+    needs: plan
+    runs-on: ubuntu-latest
+    environment: prod
+    defaults:
+      run:
+        working-directory: Infrastructure/Terraform
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Download Plan
+        uses: actions/download-artifact@v3
+        with:
+          name: tfplan
+          path: Infrastructure/Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Apply
+        run: terraform apply tfplan
+      - name: Get outputs
+        id: get-outputs
+        run: |
+          echo "vm_public_ip=$(terraform output -raw vm_public_ip)" >> "$GITHUB_OUTPUT"
+          echo "db_endpoint=$(terraform output -raw db_endpoint)" >> "$GITHUB_OUTPUT"
+    
+    outputs:
+      vm_public_ip: ${{ steps.get-outputs.outputs.vm_public_ip }}
+      db_endpoint: ${{ steps.get-outputs.outputs.db_endpoint }}
+      
+ 
