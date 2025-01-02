@@ -113,8 +113,8 @@ jobs:
       - name: Get outputs
         id: get-outputs
         run: |
-          VM_PUBLIC_IP=$(terraform output -raw vm_public_ip | awk '{NF--; print $0}')
-          DB_ENDPOINT=$(terraform output -raw db_endpoint | awk '{NF--; print $0}')
+          VM_PUBLIC_IP=$(terraform output -raw vm_public_ip | head -n 1)
+          DB_ENDPOINT=$(terraform output -raw db_endpoint | head -n 1)
           echo "vm_public_ip=$VM_PUBLIC_IP" >> "$GITHUB_OUTPUT"
           echo "db_endpoint=$DB_ENDPOINT" >> "$GITHUB_OUTPUT"
     
