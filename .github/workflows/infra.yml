@@ -67,7 +67,7 @@ jobs:
         run: terraform init
       - name: Terraform Plan
         id: plan
-        run: terraform plan -out=tfplan
+        run: terraform plan -out=tfplan -var="instance_key_name=${{ vars.INSTANCE_KEY_NAME }}"
       - name: Upload Plan
         uses: actions/upload-artifact@v3
         with:
