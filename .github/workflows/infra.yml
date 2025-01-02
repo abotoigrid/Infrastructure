@@ -138,7 +138,7 @@ jobs:
       - name: Run Ansible playbook
         run: |
           cd Ansible
-          ansible-playbook playbooks/main.yml -e "ansible_ssh_private_key_file=${{secrets.SSH_PRIVATE_KEY}}"
+          ansible-playbook main.yaml -i inventory.ini -e "ansible_ssh_private_key_file=${{secrets.SSH_PRIVATE_KEY}}"
         env:
           ANSIBLE_HOSTS: |
             [servers]
