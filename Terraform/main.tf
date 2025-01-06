@@ -1,9 +1,9 @@
 module "network" {
-  source            = "./modules/network"
-  vpc_cidr_block    = var.vpc_cidr_block
+  source              = "./modules/network"
+  vpc_cidr_block      = var.vpc_cidr_block
   subnet_cidr_block_a = var.subnet_cidr_block_a
   subnet_cidr_block_b = var.subnet_cidr_block_b
-  tags              = var.tags
+  tags                = var.tags
 }
 
 module "vm" {
@@ -12,7 +12,7 @@ module "vm" {
   instance_type     = var.instance_type
   subnet_id         = module.network.subnet_id_a
   security_group_id = module.network.security_group_id
-  ec2_key_name = var.ec2_key_name
+  ec2_key_name      = var.ec2_key_name
   tags              = var.tags
 }
 
@@ -23,6 +23,6 @@ module "database" {
   db_name     = var.db_name
   db_username = var.db_username
   db_password = var.db_password
-  vpc_id          = module.network.vpc_id
+  vpc_id      = module.network.vpc_id
   tags        = var.tags
 }

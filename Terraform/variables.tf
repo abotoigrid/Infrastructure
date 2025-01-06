@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "ami_id" {
   type        = string
   description = "AMI ID for the EC2 instance"
-  default     = "ami-0a628e1e89aaedf80" 
+  default     = "ami-0a628e1e89aaedf80"
 }
 
 variable "instance_type" {
@@ -49,8 +49,8 @@ variable "db_username" {
 variable "db_password" {
   type        = string
   description = "Password for the database"
-  sensitive   = true          
-  default     = "password123" 
+  sensitive   = true
+  default     = "password123"
 }
 
 variable "ec2_key_name" {
