@@ -129,7 +129,14 @@ jobs:
           printf "vm_public_ip=%s\n" "$VM_PUBLIC_IP" >> "$GITHUB_OUTPUT"
           printf "db_endpoint=%s\n" "$DB_ENDPOINT" >> "$GITHUB_OUTPUT"
           echo "Finished Get outputs step"
-
+      - name: Store Outputs in Parameter Store
+        run: |
+          aws ssm put-parameter --name "/myapp/ec2_public_ip" --value "${{ steps.get-outputs.outputs.vm_public_ip }}" --type "String" --overwrite
+          aws ssm put-parameter --name "/myapp/db_endpoint" --value "${{ steps.get-outputs.outputs.db_endpoint }}" --type "String" --overwrite
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
     
     outputs:
       vm_public_ip: ${{ steps.get-outputs.outputs.vm_public_ip }}
@@ -165,29 +172,6 @@ jobs:
           ansible-playbook -i inventory Ansible/main.yaml
         env:
           ANSIBLE_PRIVATE_KEY_FILE: ${{secrets.SSH_PRIVATE_KEY}}
-  dispatch_ci_cd:
-    name: Dispatch CI/CD Workflow
-    needs: ansible
-    runs-on: ubuntu-latest
-    permissions:
-      actions: write
-      repository-projects: read
-    steps:
-      - name: Dispatch CI/CD workflow
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: 'cicd',
-              workflow_id: 'ci-cd.yml',
-              ref: 'main',
-              inputs: {
-                vm_public_ip: "${{ needs.apply.outputs.vm_public_ip }}",
-                db_endpoint: "${{ needs.apply.outputs.db_endpoint }}"
-              },
-            });
 
 
   destroy:
