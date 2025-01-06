@@ -12,3 +12,9 @@ resource "aws_eip" "eip" {
   instance = aws_instance.app_server.id
   tags     = var.tags
 }
+
+resource "aws_lb_target_group_attachment" "main" {
+  target_group_arn = var.target_group_arn
+  target_id        = aws_instance.app_server.id
+  port             = 8080
+}

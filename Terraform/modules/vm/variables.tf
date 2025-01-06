@@ -27,3 +27,8 @@ variable "tags" {
   description = "Common tags for all resources"
   type        = map(string)
 }
+
+variable "target_group_arn" {
+  type        = string
+  description = "ARN of the target group"
+}
