@@ -180,7 +180,7 @@ jobs:
           script: |
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
-              repo: 'abotoigrid/cicd',
+              repo: 'cicd',
               workflow_id: 'ci-cd.yml',
               ref: 'main',
               inputs: {
