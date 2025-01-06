@@ -25,9 +25,20 @@ jobs:
         id: fmt_check
         run: terraform fmt -check
         continue-on-error: true
-      - name: Terraform Format
+      - name: Terraform Format and Commit
         if: steps.fmt_check.outcome != 'success'
-        run: terraform fmt
+        run: |
+          terraform fmt
+          git config --global user.name 'GitHub Actions Bot'
+          git config --global user.email 'actions@github.com'
+          git add .
+          git commit -m "Auto-formatted Terraform code"
+      - name: Push changes
+        if: steps.fmt_check.outcome != 'success' && !contains(github.event.head_commit.message, 'Auto-formatted Terraform code')
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
 
   validate:
     name: Terraform Validate
