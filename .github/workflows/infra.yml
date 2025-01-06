@@ -165,6 +165,29 @@ jobs:
           ansible-playbook -i inventory Ansible/main.yaml
         env:
           ANSIBLE_PRIVATE_KEY_FILE: ${{secrets.SSH_PRIVATE_KEY}}
+  dispatch_ci_cd:
+    name: Dispatch CI/CD Workflow
+    needs: ansible
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      repository-projects: read
+    steps:
+      - name: Dispatch CI/CD workflow
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: 'abotoigrid/cicd',
+              workflow_id: 'ci-cd.yml',
+              ref: 'main',
+              inputs: {
+                vm_public_ip: "${{ needs.apply.outputs.vm_public_ip }}",
+                db_endpoint: "${{ needs.apply.outputs.db_endpoint }}"
+              },
+            });
 
 
   destroy:
