@@ -151,11 +151,15 @@ jobs:
           output=$(terraform output -json)
           echo "Raw Terraform Output:"
           echo "$output"
+      - name: Test jq
+        run: |
+          echo '{"test": "value"}' | jq '.'
       - name: Get outputs
         id: get-outputs
         run: |
-          echo "vm_public_ip=$(terraform output -json | jq -r '.vm_public_ip.value')" >> $GITHUB_OUTPUT
-          echo "db_endpoint=$(terraform output -json | jq -r '.db_endpoint.value')" >> $GITHUB_OUTPUT
+          output=$(terraform output -json)
+          echo "vm_public_ip=$(echo "$output" | jq -r '.vm_public_ip.value')" >> $GITHUB_OUTPUT
+          echo "db_endpoint=$(echo "$output" | jq -r '.db_endpoint.value')" >> $GITHUB_OUTPUT
       - name: Store Outputs in Parameter Store
         run: |
           aws ssm put-parameter --name "/myapp/ec2_public_ip" --value "${{ steps.get-outputs.outputs.vm_public_ip }}" --type "String" --overwrite
