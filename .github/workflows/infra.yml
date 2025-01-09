@@ -142,8 +142,15 @@ jobs:
       #     printf "vm_public_ip=%s\n" "$VM_PUBLIC_IP" >> "$GITHUB_OUTPUT"
       #     printf "db_endpoint=%s\n" "$DB_ENDPOINT" >> "$GITHUB_OUTPUT"
       #     echo "Finished Get outputs step"
+      
+      
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install jq -y
+      - name: Debug Terraform Output
+        run: |
+          output=$(terraform output -json)
+          echo "Raw Terraform Output:"
+          echo "$output"
       - name: Get outputs
         id: get-outputs
         run: |
