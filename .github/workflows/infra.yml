@@ -148,34 +148,11 @@ jobs:
       
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install jq -y
-      - name: Hex Dump of Terraform Output
-        run: |
-          terraform output -json | xxd
-
-      - name: Check Locale and Encoding
-        run: |
-          locale
-          echo "File encoding: $(file -b --mime-encoding <(terraform output -json))"
-
-      - name: Get outputs (with tr)
+      - name: Get outputs (with grep)
         id: get-outputs
         run: |
-          echo "vm_public_ip=$(terraform output -json | tr -d '[\000-\037\177]' | jq -r '.vm_public_ip.value')" >> $GITHUB_OUTPUT
-          echo "db_endpoint=$(terraform output -json | tr -d '[\000-\037\177]' | jq -r '.db_endpoint.value')" >> $GITHUB_OUTPUT
-      - name: Debug Terraform Output
-        run: |
-          output=$(terraform output -json)
-          echo "Raw Terraform Output:"
-          echo "$output"
-      - name: Test jq
-        run: |
-          echo '{"test": "value"}' | jq '.'
-      # - name: Get outputs
-      #   id: get-outputs
-      #   run: |
-      #     output=$(terraform output -json)
-      #     echo "vm_public_ip=$(echo "$output" | jq -r '.vm_public_ip.value')" >> $GITHUB_OUTPUT
-      #     echo "db_endpoint=$(echo "$output" | jq -r '.db_endpoint.value')" >> $GITHUB_OUTPUT
+          echo "vm_public_ip=$(terraform output -json | grep -v '::debug::' | jq -r '.vm_public_ip.value')" >> $GITHUB_OUTPUT
+          echo "db_endpoint=$(terraform output -json | grep -v '::debug::' | jq -r '.db_endpoint.value')" >> $GITHUB_OUTPUT
       - name: Store Outputs in Parameter Store
         run: |
           aws ssm put-parameter --name "/myapp/ec2_public_ip" --value "${{ steps.get-outputs.outputs.vm_public_ip }}" --type "String" --overwrite
