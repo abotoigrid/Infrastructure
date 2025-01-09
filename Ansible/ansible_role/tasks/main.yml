@@ -70,6 +70,7 @@
         "agent": {
           "metrics_collection_interval": 60,
           "run_as_user": "cwagent"
+          "region": "eu-central-1" 
         },
         "metrics": {
           "append_dimensions": {
