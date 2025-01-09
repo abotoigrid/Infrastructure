@@ -112,8 +112,6 @@ jobs:
           path: Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: latest
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -126,33 +124,18 @@ jobs:
         run: terraform apply tfplan
         env:
           TF_VAR_ec2_key_name: ${{ secrets.INSTANCE_KEY_NAME }}
-      # - name: Get outputs
-      #   id: get-outputs
-      #   run: |
-      #     echo "Running Get outputs step"
-      #     VM_PUBLIC_IP_RAW=$(terraform output -raw vm_public_ip)
-      #     echo "VM_PUBLIC_IP_RAW: $VM_PUBLIC_IP_RAW"
-      #     DB_ENDPOINT_RAW=$(terraform output -raw db_endpoint)
-      #     echo "DB_ENDPOINT_RAW: $DB_ENDPOINT_RAW"
-
-      #     VM_PUBLIC_IP=$(echo "$VM_PUBLIC_IP_RAW" | sed 's/.*\[command\].*terraform-bin output -raw vm_public_ip//' | sed 's/::debug::Terraform exited with code 0.//' | awk '{print $1}' | tr -d '\n' | sed 's/::debug::stdout:::debug::stderr:::debug::exitcode:$//')
-      #     DB_ENDPOINT=$(echo "$DB_ENDPOINT_RAW" | sed 's/.*\[command\].*terraform-bin output -raw db_endpoint//' | sed 's/::debug::Terraform exited with code 0.//' | awk '{print $1}' | tr -d '\n' | sed 's/::debug::stdout:::debug::stderr:::debug::exitcode:$//')
-
-      #     echo "VM_PUBLIC_IP: $VM_PUBLIC_IP"
-      #     echo "DB_ENDPOINT: $DB_ENDPOINT"
-
-      #     printf "vm_public_ip=%s\n" "$VM_PUBLIC_IP" >> "$GITHUB_OUTPUT"
-      #     printf "db_endpoint=%s\n" "$DB_ENDPOINT" >> "$GITHUB_OUTPUT"
-      #     echo "Finished Get outputs step"
-      
-      
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install jq -y
-      - name: Get outputs (with grep)
+      - name: Get outputs
         id: get-outputs
         run: |
-          echo "vm_public_ip=$(terraform output -json | grep -v '::debug::' | jq -r '.vm_public_ip.value')" >> $GITHUB_OUTPUT
-          echo "db_endpoint=$(terraform output -json | grep -v '::debug::' | jq -r '.db_endpoint.value')" >> $GITHUB_OUTPUT
+          VM_PUBLIC_IP_RAW=$(terraform output -raw vm_public_ip)
+          DB_ENDPOINT_RAW=$(terraform output -raw db_endpoint)
+
+          VM_PUBLIC_IP=$(echo "$VM_PUBLIC_IP_RAW" | sed 's/.*\[command\].*terraform-bin output -raw vm_public_ip//' | sed 's/::debug::Terraform exited with code 0.//' | awk '{print $1}' | tr -d '\n' | sed 's/::debug::stdout:::debug::stderr:::debug::exitcode:$//')
+          DB_ENDPOINT=$(echo "$DB_ENDPOINT_RAW" | sed 's/.*\[command\].*terraform-bin output -raw db_endpoint//' | sed 's/::debug::Terraform exited with code 0.//' | awk '{print $1}' | tr -d '\n' | sed 's/::debug::stdout:::debug::stderr:::debug::exitcode:$//')
+
+          printf "vm_public_ip=%s\n" "$VM_PUBLIC_IP" >> "$GITHUB_OUTPUT"
+          printf "db_endpoint=%s\n" "$DB_ENDPOINT" >> "$GITHUB_OUTPUT"
+          
       - name: Store Outputs in Parameter Store
         run: |
           aws ssm put-parameter --name "/myapp/ec2_public_ip" --value "${{ steps.get-outputs.outputs.vm_public_ip }}" --type "String" --overwrite
