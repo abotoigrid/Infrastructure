@@ -21,7 +21,7 @@ on:
 jobs:
   fmt:
     name: Terraform Format
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -54,7 +54,7 @@ jobs:
 
   validate:
     name: Terraform Validate
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
     needs: fmt
     runs-on: ubuntu-latest
     defaults:
@@ -78,7 +78,7 @@ jobs:
 
   plan:
     name: Terraform Plan
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
     needs: validate
     runs-on: ubuntu-latest
     defaults:
@@ -108,7 +108,7 @@ jobs:
     
   apply:
     name: Terraform Apply
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
     needs: plan
     runs-on: ubuntu-latest
     defaults:
@@ -164,7 +164,7 @@ jobs:
 
   ansible:
     name: Ansible Provision
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
     needs: apply
     runs-on: ubuntu-latest
     steps:
