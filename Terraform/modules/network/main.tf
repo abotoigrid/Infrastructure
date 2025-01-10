@@ -84,11 +84,10 @@ resource "aws_security_group" "allow_http_ssh" {
   tags = var.tags
 }
 
-# --- Load Balancer ---
 
 resource "aws_lb" "main" {
   name               = "main-lb"
-  internal           = false # External
+  internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.allow_http_ssh.id]
   subnets            = [aws_subnet.main_a.id, aws_subnet.main_b.id]
