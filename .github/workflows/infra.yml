@@ -21,8 +21,8 @@ on:
 jobs:
   fmt:
     name: Terraform Format
-    runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+    runs-on: ubuntu-latest
     permissions:
       contents: write
     defaults:
@@ -54,9 +54,9 @@ jobs:
 
   validate:
     name: Terraform Validate
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
     needs: fmt
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
     defaults:
       run:
         working-directory: Terraform
@@ -78,9 +78,9 @@ jobs:
 
   plan:
     name: Terraform Plan
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
     needs: validate
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
     defaults:
       run:
         working-directory: Terraform
@@ -108,9 +108,9 @@ jobs:
     
   apply:
     name: Terraform Apply
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
     needs: plan
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
     defaults:
       run:
         working-directory: Terraform
@@ -164,9 +164,9 @@ jobs:
 
   ansible:
     name: Ansible Provision
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
     needs: apply
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -198,8 +198,8 @@ jobs:
   destroy:
     name: Terraform Destroy
     needs: apply
-    runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: Terraform
