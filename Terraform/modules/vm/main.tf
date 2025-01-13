@@ -5,6 +5,7 @@ resource "aws_instance" "app_server" {
   vpc_security_group_ids = [var.security_group_id]
   key_name               = var.ec2_key_name
   tags                   = var.tags
+  iam_instance_profile = var.iam_instance_profile_name
 }
 
 

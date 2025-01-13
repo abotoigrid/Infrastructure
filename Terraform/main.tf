@@ -13,6 +13,7 @@ module "vm" {
   subnet_id         = module.network.subnet_id_a
   security_group_id = module.network.security_group_id
   target_group_arn  = module.network.lb_target_group_arn
+  iam_instance_profile_name = var.iam_instance_profile_name
   ec2_key_name      = var.ec2_key_name
   tags              = var.tags
 }

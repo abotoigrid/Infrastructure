@@ -5,3 +5,4 @@ tags = {
   Owner   = "abotoi"
   Project = "2024_internship_moldova"
 }
+iam_instance_profile_name = "aws_internship_botoi_adrian"
