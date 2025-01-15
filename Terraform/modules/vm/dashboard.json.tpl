@@ -22,7 +22,7 @@
         "stacked": false,
         "region": "eu-central-1",
         "start": "-PT3H",
-        "period": 300,
+        "period": 60,
         "end": "P0D",
         "stat": "Average"
       }
@@ -40,7 +40,8 @@
           ["AWS/EC2", "NetworkIn", "InstanceId", "${instance_id}"],
           [".", "NetworkOut", ".", "."]
         ],
-        "region": "eu-central-1"
+        "region": "eu-central-1",
+        "period": 60
       }
     },
     {
@@ -61,7 +62,8 @@
           ],
           [".", "StatusCheckFailed_Instance", ".", "."]
         ],
-        "region": "eu-central-1"
+        "region": "eu-central-1",
+        "period": 60
       }
     },
     {
@@ -94,7 +96,7 @@
         "setPeriodToTimeRange": false,
         "sparkline": true,
         "trend": true,
-        "period": 300,
+        "period": 60,
         "stat": "Average"
       }
     },
