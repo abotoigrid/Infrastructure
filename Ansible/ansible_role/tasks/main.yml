@@ -43,7 +43,6 @@
     append: yes
   become: true
 
-# Install CloudWatch Agent
 - name: Download CloudWatch Agent package
   get_url:
     url: https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
