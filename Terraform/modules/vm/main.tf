@@ -22,12 +22,13 @@ resource "aws_lb_target_group_attachment" "main" {
 
 locals {
   dashboard_body = templatefile("${path.module}/dashboard.json.tpl", {
-    instance_id         = aws_instance.app_server.id
-    instance_private_ip = aws_instance.app_server.private_ip
+    instance_id                   = aws_instance.app_server.id
+    instance_private_ip           = aws_instance.app_server.private_ip
+    instance_private_ip_formatted = "ip-${replace(aws_instance.app_server.private_ip, ".", "-")}"
   })
 }
 
 resource "aws_cloudwatch_dashboard" "main" {
-  dashboard_name = "AppServerDashboard"
+  dashboard_name = "AppServerDashboard-${aws_instance.app_server.id}"
   dashboard_body = local.dashboard_body
 }
