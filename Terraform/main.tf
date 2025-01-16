@@ -19,13 +19,13 @@ module "vm" {
 }
 
 module "database" {
-  source      = "./modules/database"
-  subnet_id_a = module.network.subnet_id_a
-  subnet_id_b = module.network.subnet_id_b
-  db_name     = var.db_name
-  db_username = var.db_username
-  db_password = var.db_password
-  vpc_id      = module.network.vpc_id
+  source               = "./modules/database"
+  subnet_id_a          = module.network.subnet_id_a
+  subnet_id_b          = module.network.subnet_id_b
+  db_name              = var.db_name
+  db_username          = var.db_username
+  db_password          = var.db_password
+  vpc_id               = module.network.vpc_id
   vm_security_group_id = module.network.security_group_id
-  tags        = var.tags
+  tags                 = var.tags
 }
