@@ -99,7 +99,7 @@ jobs:
         run: terraform init
       - name: Terraform Plan
         id: plan
-        run: terraform plan -out=tfplan -var="ec2_key_name=${{ secrets.INSTANCE_KEY_NAME }}"
+        run: terraform plan -out=tfplan -var="ec2_key_name=${{ secrets.INSTANCE_KEY_NAME }}" -var="db_password=${{ secrets.MYSQL_PASSWORD }}"
       - name: Upload Plan
         uses: actions/upload-artifact@v3
         with:
