@@ -12,7 +12,7 @@ resource "aws_security_group" "database" {
     from_port   = 3306
     to_port     = 3306
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    security_groups = [var.vm_security_group_id]
   }
   egress {
     from_port   = 0

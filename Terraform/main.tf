@@ -26,5 +26,6 @@ module "database" {
   db_username = var.db_username
   db_password = var.db_password
   vpc_id      = module.network.vpc_id
+  vm_security_group_id = module.network.security_group_id
   tags        = var.tags
 }

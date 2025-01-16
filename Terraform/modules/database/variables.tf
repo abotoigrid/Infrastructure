@@ -32,3 +32,8 @@ variable "vpc_id" {
   type        = string
   description = "VPC ID"
 }
+
+variable "vm_security_group_id" {
+  type        = string
+  description = "Security Group ID of the VM (application server)"
+}
