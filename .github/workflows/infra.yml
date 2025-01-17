@@ -3,7 +3,7 @@ name: Infrastructure Automation
 on:
   push:
     branches:
-      - main
+      - terraformv3
   workflow_dispatch:
     inputs:
       action:
@@ -16,7 +16,7 @@ on:
         - destroy
   pull_request:
     branches:
-      - main
+      - terraformv3
 
 jobs:
   fmt:
@@ -32,7 +32,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
       - name: Terraform Format Check
         id: fmt_check
         run: terraform fmt -check
@@ -64,7 +64,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -88,7 +88,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -124,7 +124,7 @@ jobs:
           name: tfplan
           path: Terraform
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -140,11 +140,11 @@ jobs:
       - name: Get outputs
         id: get-outputs
         run: |
-          VM_PUBLIC_IP_RAW=$(terraform output -raw vm_public_ip)
-          DB_ENDPOINT_RAW=$(terraform output -raw db_endpoint)
+          VM_PUBLIC_IP=$(terraform output -raw vm_public_ip)
+          DB_ENDPOINT=$(terraform output -raw db_endpoint)
 
-          VM_PUBLIC_IP=$(echo "$VM_PUBLIC_IP_RAW" | sed 's/.*\[command\].*terraform-bin output -raw vm_public_ip//' | sed 's/::debug::Terraform exited with code 0.//' | awk '{print $1}' | tr -d '\n' | sed 's/::debug::stdout:::debug::stderr:::debug::exitcode:$//')
-          DB_ENDPOINT=$(echo "$DB_ENDPOINT_RAW" | sed 's/.*\[command\].*terraform-bin output -raw db_endpoint//' | sed 's/::debug::Terraform exited with code 0.//' | awk '{print $1}' | tr -d '\n' | sed 's/::debug::stdout:::debug::stderr:::debug::exitcode:$//')
+          # VM_PUBLIC_IP=$(echo "$VM_PUBLIC_IP_RAW" | sed 's/.*\[command\].*terraform-bin output -raw vm_public_ip//' | sed 's/::debug::Terraform exited with code 0.//' | awk '{print $1}' | tr -d '\n' | sed 's/::debug::stdout:::debug::stderr:::debug::exitcode:$//')
+          # DB_ENDPOINT=$(echo "$DB_ENDPOINT_RAW" | sed 's/.*\[command\].*terraform-bin output -raw db_endpoint//' | sed 's/::debug::Terraform exited with code 0.//' | awk '{print $1}' | tr -d '\n' | sed 's/::debug::stdout:::debug::stderr:::debug::exitcode:$//')
 
           printf "vm_public_ip=%s\n" "$VM_PUBLIC_IP" >> "$GITHUB_OUTPUT"
           printf "db_endpoint=%s\n" "$DB_ENDPOINT" >> "$GITHUB_OUTPUT"
