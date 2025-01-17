@@ -146,8 +146,10 @@ jobs:
           # VM_PUBLIC_IP=$(echo "$VM_PUBLIC_IP_RAW" | sed 's/.*\[command\].*terraform-bin output -raw vm_public_ip//' | sed 's/::debug::Terraform exited with code 0.//' | awk '{print $1}' | tr -d '\n' | sed 's/::debug::stdout:::debug::stderr:::debug::exitcode:$//')
           # DB_ENDPOINT=$(echo "$DB_ENDPOINT_RAW" | sed 's/.*\[command\].*terraform-bin output -raw db_endpoint//' | sed 's/::debug::Terraform exited with code 0.//' | awk '{print $1}' | tr -d '\n' | sed 's/::debug::stdout:::debug::stderr:::debug::exitcode:$//')
 
-          printf "vm_public_ip=%s\n" "$VM_PUBLIC_IP" >> "$GITHUB_OUTPUT"
-          printf "db_endpoint=%s\n" "$DB_ENDPOINT" >> "$GITHUB_OUTPUT"
+          # printf "vm_public_ip=%s\n" "$VM_PUBLIC_IP" >> "$GITHUB_OUTPUT"
+          # printf "db_endpoint=%s\n" "$DB_ENDPOINT" >> "$GITHUB_OUTPUT"
+          echo "vm_public_ip=$VM_PUBLIC_IP" >> "$GITHUB_OUTPUT"
+          echo "db_endpoint=$DB_ENDPOINT" >> "$GITHUB_OUTPUT"
           
       - name: Store Outputs in Parameter Store
         run: |
