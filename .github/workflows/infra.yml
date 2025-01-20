@@ -142,14 +142,17 @@ jobs:
         run: |
           VM_PUBLIC_IP=$(terraform output -raw vm_public_ip)
           DB_ENDPOINT=$(terraform output -raw db_endpoint)
+          LB_DNS_NAME=$(terraform output -raw lb_dns_name)
 
           echo "vm_public_ip=$VM_PUBLIC_IP" >> "$GITHUB_OUTPUT"
           echo "db_endpoint=$DB_ENDPOINT" >> "$GITHUB_OUTPUT"
+          echo "lb_dns_name=$LB_DNS_NAME" >> "$GITHUB_OUTPUT"
           
       - name: Store Outputs in Parameter Store
         run: |
           aws ssm put-parameter --name "/myapp/ec2_public_ip" --value "${{ steps.get-outputs.outputs.vm_public_ip }}" --type "String" --overwrite
           aws ssm put-parameter --name "/myapp/db_endpoint" --value "${{ steps.get-outputs.outputs.db_endpoint }}" --type "String" --overwrite
+          aws ssm put-parameter --name "/myapp/lb_dns_name" --value "${{ steps.get-outputs.outputs.lb_dns_name }}" --type "String" --overwrite
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
