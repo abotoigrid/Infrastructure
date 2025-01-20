@@ -142,7 +142,7 @@ jobs:
         run: |
           VM_PUBLIC_IP=$(terraform output -raw vm_public_ip)
           DB_ENDPOINT=$(terraform output -raw db_endpoint)
-          LB_DNS_NAME=$(terraform output -raw lb_dns_name)
+          LB_DNS_NAME=$(terraform output -raw load_balancer_dns_name)
 
           echo "vm_public_ip=$VM_PUBLIC_IP" >> "$GITHUB_OUTPUT"
           echo "db_endpoint=$DB_ENDPOINT" >> "$GITHUB_OUTPUT"
