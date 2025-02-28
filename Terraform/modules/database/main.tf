@@ -38,8 +38,4 @@ resource "aws_db_instance" "main" {
   tags                   = var.tags
 }
 
-# data "aws_subnet" "selected" {
-#   id = var.subnet_id
-# }
-
 
